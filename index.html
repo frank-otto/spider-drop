@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Spider Drop – a cinematic 3D Halloween swing</title>
+<meta name="description" content="Swing a cute spider on its silk thread through a candle-lit crypt: catch flies and candy, dodge candle flames, bats and the giant swatter. Easy/Medium/Hard, kids mode, EN/DE.">
+<meta name="theme-color" content="#0a0818">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%95%B7%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-state="menu">
+<canvas id="game" aria-label="Spider Drop game"></canvas>
+<div id="pops"></div>
+<div id="hud">
+  <div class="chip"><small data-t="score">Score</small><b id="hScore">0</b></div>
+  <div class="chip" id="hLivesBox"><small data-t="lives">Lives</small><b id="hLives">❤️</b></div>
+  <div class="chip" id="hMultBox"><small data-t="mult">Bonus</small><b id="hMult">×1</b></div>
+  <div class="chip" id="hTimeBox"><small data-t="time">Time</small><b id="hTime">60</b></div>
+</div>
+<div id="hint"></div>
+<div id="top">
+  <button id="btnQ" class="pill">⚙</button>
+  <button id="btnSound" class="pill on" aria-label="Sound">🔊</button>
+  <button id="btnLang" class="pill">DE</button>
+</div>
+<div id="toast"></div>
+<section id="menu" class="panel show">
+  <h1 data-t="title">Spider Drop</h1>
+  <p class="sub" data-t="sub"></p>
+  <ul class="how">
+    <li><span>🕸️</span><em data-t="h1"></em></li>
+    <li><span>🪰</span><em data-t="h2"></em></li>
+    <li><span>🕯️</span><em id="h3"></em></li>
+  </ul>
+  <button id="btnPlay" class="big" data-t="play">Swing!</button>
+  <div id="diff" role="group"><small data-t="difficulty"></small><button data-d="easy" data-t="d_easy"></button><button data-d="medium" data-t="d_medium"></button><button data-d="hard" data-t="d_hard"></button></div>
+  <button id="btnKids" class="toggle" aria-pressed="false"><i></i><span data-t="kids">Kids mode</span></button>
+</section>
+<section id="end" class="panel">
+  <h2 id="eTitle"></h2>
+  <div id="eScore" class="score">0</div>
+  <div id="eBest" class="best"></div>
+  <div id="eStats" class="stats"></div>
+  <label class="name"><span data-t="name">Your name</span><input id="eName" maxlength="18" value="Player" autocomplete="off"></label>
+  <div class="row"><button id="btnCard" data-t="card"></button><button id="btnShare" data-t="share"></button></div>
+  <div class="row"><button id="btnAgain" class="big" data-t="again"></button><button id="btnMenu" data-t="menu"></button></div>
+</section>
+<script src="js/sounds-src.js"></script>
+<script src="js/game.bundle.js"></script>
+</body>
+</html>
