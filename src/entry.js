@@ -23,7 +23,7 @@ const DIFF = {
 };
 const S = {
   state: 'menu', lang: ls.get('sd-lang', 'en'), diff: ls.get('sd-diff', 'medium'), kids: ls.get('sd-kids', '0') === '1', q: ls.get('sd-q', ''), qUser: !!ls.get('sd-q', ''),
-  score: 0, el: 0, gt: 0, dist: 0, flies: 0, candies: 0, golds: 0, streak: 0, bestStreak: 0, mult: 1, lives: 3, inv: 0, newBest: false, best: 0, hits: 0,
+  score: 0, el: 0, gt: 0, slow: 0, dist: 0, flies: 0, candies: 0, golds: 0, streak: 0, bestStreak: 0, mult: 1, lives: 3, inv: 0, newBest: false, best: 0, hits: 0,
   name: ls.get('sd-name', 'Player') || 'Player', shake: 0, flash: 0, endT: -1, time: KIDS_ROUND, hold: false, swings: 0
 };
 if (!DIFF[S.diff] || S.diff === 'kids') S.diff = 'medium';
@@ -100,13 +100,14 @@ function spawnPattern() {
   const arc = (x0, n, y0, y1) => { for (let i = 0; i < n; i++) { const u = i / (n - 1); addItem('fly', x0 + i * 1.05, lerp(y0, y1, u) + Math.sin(u * Math.PI) * 1.2); } };
   if (p === 0) { arc(x - 6, 7, 3.2, 4.6); nextX += 9; return; }
   if (p === 1) { addCandle(x + 2, 0, 1.6); arc(x - 1, 5, 4.2, 5.2); addItem('candy', x + 4.5, 5.6); nextX += 11; return; }
-  const roll = rng() * d.haz + (1 - d.haz) * .0;
-  if (rng() > d.haz) { // treats only
+  const early = x - S.x0 < (S.diff === 'hard' ? 34 : 44), hz = d.haz * (.65 + .35 * k);
+  const roll = rng() * d.haz;
+  if (early || rng() > hz) { // treats only
     const cx = x + 2, cy = 3.5 + rng() * 2.5; for (let i = 0; i < 8; i++) addItem('fly', cx + Math.cos(i / 8 * 6.28) * 1.4, cy + Math.sin(i / 8 * 6.28) * 1.4); addItem(rng() < .18 ? 'gold' : 'candy', cx, cy);
   } else if (roll < .3 * d.haz) { // floor candles
     const n = 2 + Math.floor(rng() * 2); for (let i = 0; i < n; i++) addCandle(x + i * 2.4, 0, 1.4 + rng() * 2.2); arc(x - 1, 6, 5.2, 5.8);
   } else if (roll < .55 * d.haz) { // floating candles with a gap
-    const gy = 3 + rng() * 3; addCandle(x + 1, gy + 1.5, .9, true); addCandle(x + 1, gy - 2.6, .9, true); for (let i = 0; i < 4; i++) addItem('fly', x - .5 + i * 1, gy + .2); addCandle(x + 1, 0, 1.2);
+    const gy = 3.6 + rng() * 2.2; addCandle(x + 1, gy + 2.1, .8, true); if (gy > 4.6) addCandle(x + 1, gy - 3.3, .8, true); for (let i = 0; i < 4; i++) addItem('fly', x - .5 + i * 1, gy + .4);
   } else if (roll < .78 * d.haz) { // bats
     addBat(x + 3, 3 + rng() * 3); if (rng() < .5) addBat(x + 6, 3 + rng() * 3); arc(x, 5, 6.5, 6.8);
   } else { // swatter
@@ -140,7 +141,7 @@ function collect(it) {
   const m = S.mult * D().mult;
   if (it.kind === 'fly') { S.flies++; S.score += Math.round(10 * m); A.sfx.fly(S.streak); sparks(F, at, 26, { colors: ['#d8ff9a', '#ffffff'], speed: 3, life: .6, grav: 1, size: .1 }); }
   else if (it.kind === 'candy') { S.candies++; S.score += Math.round(50 * m); A.sfx.candy(); sparks(F, at, 60, { colors: ['#ff7ab0', '#ffd27a', '#b88aff'], speed: 4.5, life: .9, grav: 2, size: .13 }); popText(`+${Math.round(50 * m)}`, '#ffb8d8', 1, .2); S.shake = Math.max(S.shake, .2); }
-  else { S.golds++; S.score += Math.round(200 * m); A.sfx.gold(); sparks(F, at, 150, { colors: ['#ffd23a', '#fff2b0', '#ff9a2a'], speed: 6, life: 1.2, grav: 2, size: .15 }); popText(t('gold') + ` +${Math.round(200 * m)}`, '#ffd23a', 1.15, .5); if (!S.kids && S.lives < D().lives) { S.lives++; popText(t('heart'), '#ff8aa8', .9, 1.2); } S.flash = Math.max(S.flash, .3); S.shake = .45; }
+  else { S.golds++; S.score += Math.round(200 * m); A.sfx.gold(); sparks(F, at, 150, { colors: ['#ffd23a', '#fff2b0', '#ff9a2a'], speed: 6, life: 1.2, grav: 2, size: .15 }); popText(t('gold') + ` +${Math.round(200 * m)}`, '#ffd23a', 1.15, .5); if (!S.kids && S.lives < D().lives) { S.lives++; popText(t('heart'), '#ff8aa8', .9, 1.2); } S.flash = Math.max(S.flash, .3); S.shake = .45; S.slow = .45; }
   hud();
 }
 function hurt(kind, from) {
@@ -151,7 +152,7 @@ function hurt(kind, from) {
   const pos = new THREE.Vector3(P.x, P.y, 0);
   if (S.kids) { popText('💫', '#ffe08a', 1, .4); sparks(F, pos, 25, { colors: ['#ffe08a', '#ffffff'], speed: 3, life: .6, grav: 2, size: .1 }); hud(); return true; }
   S.lives--; S.hits++; S.shake = .9; S.flash = Math.max(S.flash, .2);
-  popText(t({ candle: 'burn', bat: 'batHit', swatter: 'swat', floor: 'floor' }[kind]) + ' −❤️', '#ff8a8a', 1.05, .4); pulse('hLivesBox', true);
+  popText(t({ candle: 'burn', bat: 'batHit', swatter: 'swat', floor: 'floor' }[kind]) + ' −❤️', '#ffd6d6', 1.05, 1.3); pulse('hLivesBox', true);
   sparks(F, pos, 40, { colors: kind === 'candle' ? ['#ffb050', '#ff6a20', '#ffe0a0'] : ['#d8c8ff', '#ffffff'], speed: 4, life: .7, grav: 3, size: .12 }); puff(F, pos, 3, kind === 'candle' ? '#5a4a4a' : '#6a5a8a', .7);
   if (S.lives <= 0) S.endT = S.gt + 1.2; hud(); return true;
 }
@@ -170,9 +171,10 @@ function applyLang() {
   $('btnSound').classList.toggle('on', !A.isMuted()); $('btnQ').textContent = '⚙ ' + t('q_' + S.q); hud();
 }
 const timers = [];
+const popT = [];
 function popText(txt, col, big = 1, yOff = 0) {
   const v = new THREE.Vector3(P.x, P.y + 1 + yOff, 0).project(camera); const el = document.createElement('div'); el.className = 'pop'; el.textContent = txt;
-  el.style.left = clamp((v.x * .5 + .5) * VW, 100, VW - 100) + 'px'; el.style.top = clamp((-v.y * .5 + .5) * VH, 90, VH - 60) + 'px'; el.style.color = col; el.style.fontSize = (30 * big * (VW < 600 ? .85 : 1)) + 'px';
+  el.style.left = clamp((v.x * .5 + .5) * VW, 100, VW - 100) + 'px'; el.style.top = clamp((-v.y * .5 + .5) * VH, 90, VH - 60) + 'px'; el.style.color = col; { const now = S.gt; popT.splice(0, popT.length, ...popT.filter(q => now - q < .7)); el.style.marginTop = (-popT.length * 36) + 'px'; popT.push(now); } el.style.fontSize = (30 * big * (VW < 600 ? .85 : 1)) + 'px';
   $('pops').appendChild(el); timers.push({ t: S.gt + 1.2, f: () => el.remove() });
 }
 function toast(s) { const el = $('toast'); el.textContent = s; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2500); }
@@ -243,7 +245,7 @@ function physics(dt) {
   }
 }
 function step(dt) {
-  dt = Math.min(dt, 1 / 20); S.gt += dt;
+  dt = Math.min(dt, 1 / 20); if (S.slow > 0) { S.slow -= dt; dt *= .4; } S.gt += dt;
   for (let i = timers.length - 1; i >= 0; i--) if (timers[i].t <= S.gt) { const f = timers[i].f; timers.splice(i, 1); f(); }
   const playing = S.state === 'play';
   if (playing) { S.el += dt; if (S.kids) { S.time = Math.max(0, KIDS_ROUND - S.el); if (S.time <= 0) end(); } }
@@ -320,6 +322,6 @@ window.__sd = { S, start, end, step: (dt, n = 1) => { for (let i = 0; i < n; i++
   items: () => items.filter(i => !i.taken).map(i => ({ kind: i.kind, x: i.m.position.x, y: i.m.position.y })),
   hazards: () => haz.map(h => ({ kind: h.kind, x: h.kind === 'bat' ? h.m.position.x : h.x, y: h.kind === 'bat' ? h.m.position.y : (h.flame ? h.flame.y : 0) })),
   spawn: (kind, x, y, extra) => { if (kind === 'candle') addCandle(x, y || 0, extra || 2, !!y); else if (kind === 'bat') { addBat(x, y); if (extra !== undefined) haz[haz.length - 1].ph = extra; } else if (kind === 'swatter') { addSwatter(x); if (extra !== undefined) haz[haz.length - 1].ph = extra; } else addItem(kind, x, y); },
-  clear: () => { clearLevel(); nextX = P.x + 1e5; }, place: (x, y, vx, vy) => { P.set(x, y); V.set(vx, vy); attached = null; }, diffs: DIFF, diff: () => S.diff,
+  clear: () => { clearLevel(); nextX = P.x + 1e5; }, place: (x, y, vx, vy) => { P.set(x, y); V.set(vx, vy); attached = null; }, diffs: DIFF, diff: () => S.diff, segs: () => W.segs.map(g => g.position.x),
   screen: (x, y) => { const v = new THREE.Vector3(x, y, 0).project(camera); return { x: (v.x * .5 + .5) * VW, y: (-v.y * .5 + .5) * VH }; } };
 document.body.classList.add('ready');

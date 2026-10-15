@@ -129,7 +129,7 @@ export function createWorld(renderer, q, seed = 3) {
 }
 // candles: array of {x, y (flame), on} (closest get the real lights)
 export function updateWorld(W, t, dt, camX, focusX, candles, q) {
-  for (const s of W.segs) { if (s.position.x + SEG < camX - 16) s.position.x += SEG * NSEG; }
+  { const lo = Math.floor((camX - 16) / SEG) * SEG, span = SEG * NSEG; for (const s of W.segs) { while (s.position.x + SEG <= lo) s.position.x += span; while (s.position.x >= lo + span) s.position.x -= span; } }
   const near = candles.filter(c => Math.abs(c.x - focusX) < 18).sort((a, b) => Math.abs(a.x - focusX) - Math.abs(b.x - focusX));
   W.candleLights.forEach((l, i) => { const c = near[i]; if (!c || i >= q.lights) { l.L.intensity = 0; return; } l.L.position.set(c.x, c.y + .4, .8); l.L.intensity = 7 * (.82 + .18 * Math.sin(t * 11 + l.ph) * Math.sin(t * 6.1 + l.ph)); });
   W.moon.position.set(focusX - 5, 8, 14); W.moon.target.position.set(focusX, 3, -4);

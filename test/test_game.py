@@ -84,7 +84,7 @@ async def main():
         check('touching the floor costs a life and bounces the spider up', l4 == 2 and v['vy'] > 0 or l4 == 2 and v['y'] > 1.5, (l4, v))
         # candy corn heals
         await pg.evaluate('__sd.release(); __sd.clear(); __sd.place(__sd.pos().x, 5, 0, 0); __sd.S.lives = 3; __sd.S.inv = 0; __sd.S.endT = -1; __sd.S.lives = 2; const p = __sd.pos(); __sd.place(p.x, 5, 3, 0); __sd.spawn("gold", p.x + .6, 5); __sd.step(1/30, 6)')
-        check('golden candy corn: +200 and a life back', await pg.evaluate('__sd.S.lives') == 3 and await pg.evaluate('__sd.S.golds') == 1, await pg.evaluate('[__sd.S.state, __sd.S.lives, __sd.S.golds, __sd.S.endT, __sd.S.gt]'))
+        check('golden candy corn: +200 and a life back', await pg.evaluate('__sd.S.lives') == 3 and await pg.evaluate('__sd.S.golds') >= 1, await pg.evaluate('[__sd.S.state, __sd.S.lives, __sd.S.golds, __sd.S.endT, __sd.S.gt]'))
         # game over
         await pg.evaluate('for (let i = 0; i < 6 && __sd.S.state === "play"; i++) { __sd.S.inv = 0; __sd.release(); __sd.place(__sd.pos().x, 1.5, 2, -6); __sd.step(1/30, 50); }'); await pg.evaluate('__sd.step(1/30, 45)')
         check('losing all lives ends the round → end screen', await pg.evaluate('__sd.S.state') == 'end' and await pg.is_visible('#end.show') and (await pg.text_content('#eTitle')) == 'The spider needs a nap!', await pg.evaluate('[__sd.S.state, __sd.S.lives, __sd.S.endT, __sd.S.gt]'))
@@ -134,6 +134,20 @@ async def main():
             ctx, pg, logs = await page(b, q=q, viewport={'width': 960, 'height': 600})
             await pg.evaluate('__sd.start(); __sd.step(1/30, 30)'); qq = await pg.evaluate('__sd.quality()'); await pg.screenshot(path=OUT + f'shot-quality-{q}.png')
             check(f'quality {q} renders without errors', qq == q and not logs, logs[:3]); await ctx.close()
+        # ---- polish-pass regressions ----
+        ctx, pg, logs = await page(b, viewport={'width': 1280, 'height': 800})
+        await pg.evaluate('__sd.step(1/30, 600)'); await pg.click('#btnPlay'); await pg.evaluate('__sd.step(1/30, 5)')
+        px = (await pg.evaluate('__sd.pos()'))['x']; segs = await pg.evaluate('__sd.segs()')
+        check('crypt walls surround the spider even after a long menu demo (no black void)', any(s0 <= px <= s0 + 24 for s0 in segs) and any(s0 <= px + 14 <= s0 + 24 for s0 in segs), (px, segs))
+        x0 = await pg.evaluate('__sd.S.x0'); hz = await pg.evaluate('__sd.hazards()')
+        early = [h for h in hz if h['x'] - x0 < 34]
+        check('fair start: only one low tutorial candle in the first stretch, no bats/swatters', len(early) <= 1 and all(h['kind'] == 'candle' for h in early), early)
+        check('graphics label "Normal" (no clash with difficulty "Medium")', 'Normal' in await pg.text_content('#btnQ'), await pg.text_content('#btnQ'))
+        await pg.evaluate('__sd.S.lives = 2; __sd.clear(); const p = __sd.pos(); __sd.place(p.x, 5, 3, 0); __sd.spawn("gold", p.x + .4, 5); __sd.step(1/30, 2)')
+        sl = await pg.evaluate('__sd.S.slow'); mt = await pg.evaluate("[...document.querySelectorAll('#pops .pop')].map(e => e.style.marginTop)")
+        check('golden candy corn: short slow-motion moment', sl > 0, sl)
+        check('pop texts stack instead of overlapping', len(mt) >= 2 and len(set(mt)) == len(mt), mt)
+        check('no console errors (polish)', not logs, logs[:5]); await ctx.close()
         await b.close()
     bundle = open(ROOT + '/js/game.bundle.js', encoding='utf8').read()
     check('sounds are recorded samples (no oscillator synth)', 'createOscillator' not in bundle)

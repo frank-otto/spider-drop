@@ -10,7 +10,7 @@ export const T = {
     flies: 'flies', candies: 'candies', bestStreak: 'best streak', dist: 'm swung', hold: 'HOLD to swing', release: 'let go!',
     burn: 'Hot!', batHit: 'Bat!', swat: 'SWAT!', floor: 'Bonk!', gold: 'GOLDEN CANDY CORN!', heart: '+1 ❤️',
     cardLine: 'How far can your spider swing?', cardCta: 'Play free in your browser', 
-    d_easy: 'Easy', d_medium: 'Medium', d_hard: 'Hard', difficulty: 'Difficulty', q_low: 'Low', q_mid: 'Medium', q_high: 'High', q_ultra: 'Ultra', autoQ: 'Quality adjusted:'
+    d_easy: 'Easy', d_medium: 'Medium', d_hard: 'Hard', difficulty: 'Difficulty', q_low: 'Low', q_mid: 'Normal', q_high: 'High', q_ultra: 'Ultra', autoQ: 'Quality adjusted:'
   },
   de: {
     title: 'Spider Drop', sub: 'Ein filmischer 3D-Halloween-Schwung',
@@ -23,6 +23,6 @@ export const T = {
     flies: 'Fliegen', candies: 'Süßigkeiten', bestStreak: 'beste Serie', dist: 'm geschwungen', hold: 'HALTEN zum Schwingen', release: 'loslassen!',
     burn: 'Heiß!', batHit: 'Fledermaus!', swat: 'KLATSCH!', floor: 'Bonk!', gold: 'GOLDENES CANDY CORN!', heart: '+1 ❤️',
     cardLine: 'Wie weit schwingt deine Spinne?', cardCta: 'Kostenlos im Browser spielen',
-    d_easy: 'Leicht', d_medium: 'Mittel', d_hard: 'Schwer', difficulty: 'Schwierigkeit', q_low: 'Niedrig', q_mid: 'Mittel', q_high: 'Hoch', q_ultra: 'Ultra', autoQ: 'Qualität angepasst:'
+    d_easy: 'Leicht', d_medium: 'Mittel', d_hard: 'Schwer', difficulty: 'Schwierigkeit', q_low: 'Niedrig', q_mid: 'Normal', q_high: 'Hoch', q_ultra: 'Ultra', autoQ: 'Qualität angepasst:'
   }
 };

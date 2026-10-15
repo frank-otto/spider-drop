@@ -6,7 +6,7 @@ A cinematic 3D Halloween browser game. A cute little spider swings on its silk t
 
 ## How to play (in 5 seconds)
 - **One button.** **Hold** (mouse button, finger on the screen, **Space / ↑ / W**) to shoot silk to the ceiling ahead and swing. **Let go** to fly off and keep the momentum.
-- **Flies** (+10) and **candy** (+50). A rare **golden candy corn** gives +200 and a life back.
+- **Flies** (+10) and **candy** (+50). A rare **golden candy corn** gives +200 and a life back, with a short slow-motion moment.
 - **Candle flames**, **bats** and the swinging **fly swatter** cost a life, and so does touching the **floor** (you bounce back up).
 - Catch things in a row for a **bonus multiplier** (up to ×5). Distance counts too.
 
@@ -26,7 +26,7 @@ npm install && npm run build
 ```
 
 ## Tests
-`python3 test/test_game.py` (Playwright + Chrome, headless WebGL, 41 checks): no console errors, EN/DE toggle and memory, fun within 5 s, mouse / keyboard / touch controls, pendulum physics, candle / bat / swatter / floor hits, golden candy corn, game over, highscore per difficulty, PNG card, difficulty levels, kids mode, mobile portrait, all quality levels, sample decoding, no synth sounds.
+`python3 test/test_game.py` (Playwright + Chrome, headless WebGL, 47 checks): no console errors, EN/DE toggle and memory, fun within 5 s, mouse / keyboard / touch controls, pendulum physics, candle / bat / swatter / floor hits, golden candy corn, game over, highscore per difficulty, PNG card, difficulty levels, kids mode, mobile portrait, all quality levels, sample decoding, no synth sounds.
 
 ## Credits
 All sounds are recorded CC0 samples (see `LICENSES/SOUNDS.md`). Three.js (MIT). Font: Fredoka (SIL Open Font License 1.1).

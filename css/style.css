@@ -15,7 +15,7 @@ body:not([data-state=play]) #hud { opacity: 0; pointer-events: none; }
 .pill { background: rgba(14,10,36,.6); color: #fff; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 7px 12px; font: 600 14px Fredoka, sans-serif; cursor: pointer; }
 #btnSound:not(.on) { opacity: .45; }
 #pops { position: fixed; inset: 0; pointer-events: none; }
-.pop { position: absolute; transform: translate(-50%, -50%); font-weight: 700; white-space: nowrap; text-shadow: 0 3px 0 rgba(20,10,40,.9), 0 0 24px rgba(0,0,0,.6); animation: pop 1.2s ease-out forwards; }
+.pop { position: absolute; transform: translate(-50%, -50%); font-weight: 700; white-space: nowrap; -webkit-text-stroke: 1px rgba(20,10,40,.55); text-shadow: 0 3px 0 rgba(20,10,40,.95), 0 0 14px rgba(10,5,20,.9), 0 0 28px rgba(0,0,0,.7); animation: pop 1.2s ease-out forwards; }
 @keyframes pop { 0% { transform: translate(-50%, -30%) scale(.6); opacity: 0; } 15% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } 100% { transform: translate(-50%, -150%) scale(1); opacity: 0; } }
 #toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: rgba(14,8,30,.75); padding: 8px 14px; border-radius: 12px; font-size: 14px; opacity: 0; transition: .3s; pointer-events: none; } #toast.show { opacity: 1; }
 .panel { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -46%) scale(.96); width: min(92vw, 480px); max-height: 94vh; overflow: auto; padding: 24px 24px 18px; text-align: center;
@@ -49,6 +49,6 @@ button { font-family: Fredoka, sans-serif; cursor: pointer; }
   .pill { padding: 6px 9px; font-size: 12px; }
   .how li { font-size: 13px; padding: 6px 8px; } .panel { padding: 18px 16px 14px; }
 }
-#hint { position: fixed; left: 50%; bottom: max(28px, env(safe-area-inset-bottom)); transform: translateX(-50%); padding: 9px 18px; border-radius: 16px; background: rgba(20,12,30,.6); border: 1px solid rgba(255,220,180,.3); font-size: 20px; font-weight: 700; opacity: 0; transition: opacity .3s; pointer-events: none; animation: bob 1s ease-in-out infinite; }
+#hint { white-space: nowrap; position: fixed; left: 50%; bottom: max(28px, env(safe-area-inset-bottom)); transform: translateX(-50%); padding: 9px 18px; border-radius: 16px; background: rgba(20,12,30,.6); border: 1px solid rgba(255,220,180,.3); font-size: 20px; font-weight: 700; opacity: 0; transition: opacity .3s; pointer-events: none; animation: bob 1s ease-in-out infinite; }
 #hint.show { opacity: 1; } @keyframes bob { 50% { transform: translateX(-50%) translateY(-6px); } }
 #hLives { letter-spacing: -2px; font-size: 18px; }
