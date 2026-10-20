@@ -2,7 +2,7 @@
 
 A cinematic 3D Halloween browser game. A cute little spider swings on its silk thread through a candle-lit crypt full of cobwebs, coffins, skulls and drifting dust. Shoot silk, swing, let go at the right moment and fly on — catch flies and candy, and steer clear of candle flames, bats and a giant fly swatter.
 
-**Play:** https://frank-otto.github.io/spider-drop/
+**Play:** [online version (GitHub Pages)](https://frank-otto.github.io/spider-drop/)
 
 ## How to play (in 5 seconds)
 - **One button.** **Hold** (mouse button, finger on the screen, **Space / ↑ / W**) to shoot silk to the ceiling ahead and swing. **Let go** to fly off and keep the momentum.
