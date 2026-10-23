@@ -84,7 +84,7 @@ export function swatter() {
   const g = new THREE.Group(); const L = 5.2;
   const handle = new THREE.Mesh(new THREE.CylinderGeometry(.07, .09, L - 1, 10), new THREE.MeshStandardMaterial({ color: '#8a5a2a', roughness: .6 })); handle.position.y = -(L - 1) / 2; handle.castShadow = true; g.add(handle);
   const c = document.createElement('canvas'); c.width = c.height = 128; const k = c.getContext('2d'); k.fillStyle = '#d02a2a'; k.fillRect(0, 0, 128, 128); k.fillStyle = '#7a0a0a'; for (let i = 0; i < 128; i += 12) { k.fillRect(i, 0, 4, 128); k.fillRect(0, i, 128, 4); }
-  const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace;
+  const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; tx.userData.own = true; // freed with the swatter
   const head = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.7, .1), new THREE.MeshStandardMaterial({ map: tx, roughness: .5, emissive: '#400000', emissiveIntensity: .4 })); head.position.y = -L + .2; head.castShadow = true; g.add(head);
   const rim = new THREE.Mesh(new THREE.BoxGeometry(1.62, 1.82, .06), new THREE.MeshStandardMaterial({ color: '#601010' })); rim.position.copy(head.position); rim.position.z = -.03; g.add(rim);
   g.userData.L = L - .2; return g;

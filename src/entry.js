@@ -21,8 +21,10 @@ const DIFF = {
   hard: { g: 19, lives: 2, gap0: 11, gap1: 8, haz: .95, swat: 1.25, batSp: 3.5, mult: 1.5 },
   kids: { g: 13, lives: 99, gap0: 16, gap1: 14, haz: .4, swat: .6, batSp: 1, mult: 1 }
 };
+// language follows the phone/browser (German devices → DE, else EN) until the player picks one with the DE/EN toggle
+function autoLang() { try { const l = (navigator.languages && navigator.languages[0]) || navigator.language || ''; return /^de\b/i.test(l) ? 'de' : 'en'; } catch (e) { return 'en'; } }
 const S = {
-  state: 'menu', lang: ls.get('sd-lang', 'en'), diff: ls.get('sd-diff', 'medium'), kids: ls.get('sd-kids', '0') === '1', q: ls.get('sd-q', ''), qUser: !!ls.get('sd-q', ''),
+  state: 'menu', lang: (ls.get('sd-lang', '') || autoLang()), diff: ls.get('sd-diff', 'medium'), kids: ls.get('sd-kids', '0') === '1', q: ls.get('sd-q', ''), qUser: !!ls.get('sd-q', ''),
   score: 0, el: 0, gt: 0, slow: 0, dist: 0, flies: 0, candies: 0, golds: 0, streak: 0, bestStreak: 0, mult: 1, lives: 3, inv: 0, newBest: false, best: 0, hits: 0,
   name: ls.get('sd-name', 'Player') || 'Player', shake: 0, flash: 0, endT: -1, time: KIDS_ROUND, hold: false, swings: 0
 };
@@ -42,7 +44,7 @@ const camera = new THREE.PerspectiveCamera(48, 1, .1, 200);
 const F = createFX(scene, W.soft, W.smokeTex);
 let composer, bloom;
 function buildComposer() {
-  if (composer) composer.dispose();
+  if (composer) { composer.passes.forEach(p => p.dispose && p.dispose()); composer.dispose(); } // passes (bloom/bokeh render targets) are not freed by composer.dispose()
   composer = new EffectComposer(renderer); composer.addPass(new RenderPass(scene, camera));
   bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), .3 * QUALITY[S.q].bloom, .35, .9); composer.addPass(bloom); // small, high threshold: flames glow, no glare veil
   composer.addPass(new OutputPass());
@@ -81,6 +83,8 @@ function releaseP() { S.hold = false; detach(); }
 const items = [], haz = [], candles = [];
 let nextX = 10, pat = 0;
 const halo = new THREE.SpriteMaterial({ map: W.soft, color: '#bfffa0', transparent: true, opacity: .32, blending: THREE.AdditiveBlending, depthWrite: false });
+// free a level object that scrolled away / was collected: its own geometries (sprites share three's one quad, skip) and its own untextured materials; shared materials/textures stay
+function disposeLevelObj(o) { if (!o) return; if (o.parent) o.parent.remove(o); const ms = new Set(); o.traverse(c => { if (c.geometry && !c.isSprite) c.geometry.dispose(); if (c.material) (Array.isArray(c.material) ? c.material : [c.material]).forEach(m => { if (m !== halo && (!m.map || m.map.userData.own)) ms.add(m); }); }); ms.forEach(m => { if (m.map && m.map.userData.own) m.map.dispose(); m.dispose(); }); }
 function addItem(kind, x, y) {
   const m = kind === 'fly' ? fly() : kind === 'gold' ? candyCorn() : candy(['#ff5a8a', '#ff9a2a', '#b06aff', '#4ad8ff'][Math.floor(rng() * 4)]);
   m.position.set(x, y, 0); if (kind === 'fly') m.scale.setScalar(1.3); scene.add(m);
@@ -115,7 +119,7 @@ function spawnPattern() {
   }
   nextX += gap;
 }
-function clearLevel() { for (const it of items) scene.remove(it.m); items.length = 0; for (const h of haz) scene.remove(h.m); haz.length = 0; candles.length = 0; pat = 0; }
+function clearLevel() { for (const it of items) disposeLevelObj(it.m); items.length = 0; for (const h of haz) disposeLevelObj(h.m); haz.length = 0; candles.length = 0; pat = 0; }
 
 // ---------------- game flow ----------------
 function start() {
@@ -257,10 +261,10 @@ function step(dt) {
   // items
   for (let i = items.length - 1; i >= 0; i--) {
     const it = items[i]; it.ph += dt; const m = it.m;
-    if (it.taken) { it.t += dt; m.position.lerp(_v.set(P.x, P.y, 0), 1 - Math.exp(-dt * 14)); m.scale.multiplyScalar(Math.exp(-dt * 9)); if (it.t > .3) { scene.remove(m); items.splice(i, 1); } continue; }
+    if (it.taken) { it.t += dt; m.position.lerp(_v.set(P.x, P.y, 0), 1 - Math.exp(-dt * 14)); m.scale.multiplyScalar(Math.exp(-dt * 9)); if (it.t > .3) { disposeLevelObj(m); items.splice(i, 1); } continue; }
     if (it.kind === 'fly') { m.position.set(it.x + Math.sin(it.ph * 2.3) * .15, it.y + Math.sin(it.ph * 3.1) * .18, Math.sin(it.ph * 1.7) * .15); m.rotation.y = Math.sin(it.ph) * .8; const f = Math.sin(it.ph * 60) * .8; m.userData.w1.rotation.x = f; m.userData['w-1'].rotation.x = -f; }
     else { m.rotation.y += dt * 2; m.position.y = it.y + Math.sin(it.ph * 2) * .1; }
-    if (it.x < P.x - 14) { scene.remove(m); items.splice(i, 1); continue; }
+    if (it.x < P.x - 14) { disposeLevelObj(m); items.splice(i, 1); continue; }
     const rr = it.kind === 'fly' ? .75 : .9; if ((m.position.x - P.x) ** 2 + (m.position.y - P.y) ** 2 < (rr + R * .6) ** 2) collect(it);
   }
   // hazards
@@ -281,7 +285,7 @@ function step(dt) {
       if ((P.x - hx) ** 2 + (P.y - hy) ** 2 < (h.r + R) ** 2) { hit = true; from = new THREE.Vector2(hx, hy); }
     }
     if (hit && playing) { if (h.kind !== 'candle' || !S.kids) hurt(h.kind, from); }
-    if ((h.kind === 'bat' ? h.m.position.x : h.x) < P.x - 16) { scene.remove(h.m); haz.splice(i, 1); const ci = candles.indexOf(h.c); if (ci >= 0) candles.splice(ci, 1); }
+    if ((h.kind === 'bat' ? h.m.position.x : h.x) < P.x - 16) { disposeLevelObj(h.m); haz.splice(i, 1); const ci = candles.indexOf(h.c); if (ci >= 0) candles.splice(ci, 1); }
   }
   if (playing && S.endT > 0 && S.gt >= S.endT) end();
   // spider pose + silk
@@ -317,7 +321,7 @@ applyQuality(S.q); applyLang(); show('menu');
 let last = performance.now();
 function loop(now) { const dt = (now - last) / 1000; last = now; if (!window.__sdManual) { step(dt); render(); fpsTick(dt); } requestAnimationFrame(loop); }
 requestAnimationFrame(loop);
-window.__sd = { S, start, end, step: (dt, n = 1) => { for (let i = 0; i < n; i++) step(dt); render(); }, log: A.log, quality: q => q ? applyQuality(q, true) : S.q, renderer,
+window.__sd = { S, audioState: () => A.audioState(), start, end, step: (dt, n = 1) => { for (let i = 0; i < n; i++) step(dt); render(); }, log: A.log, quality: q => q ? applyQuality(q, true) : S.q, renderer,
   press, release: releaseP, pos: () => ({ x: P.x, y: P.y, vx: V.x, vy: V.y, att: attached ? { x: attached.x, y: attached.y } : null }),
   items: () => items.filter(i => !i.taken).map(i => ({ kind: i.kind, x: i.m.position.x, y: i.m.position.y })),
   hazards: () => haz.map(h => ({ kind: h.kind, x: h.kind === 'bat' ? h.m.position.x : h.x, y: h.kind === 'bat' ? h.m.position.y : (h.flame ? h.flame.y : 0) })),

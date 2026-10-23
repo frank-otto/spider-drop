@@ -14,7 +14,7 @@ Difficulty: **Easy** (gentler gravity, wide gaps, slow bats and swatters, 5 live
 
 **Kids mode:** a calm 60-second swing with softer gravity. The floor is bouncy and candles and bats only bump the spider — nothing is ever lost.
 
-Extras: English by default with a **DE** toggle (remembered), shareable **highscore card** (PNG, 1080×1350), **quality levels** (Low / Mid / High / Ultra; steps down automatically if the frame rate drops), live demo spider in the menu.
+Extras: the language follows your phone or browser (German devices get German, everything else English), with a small **DE/EN** toggle (remembered), shareable **highscore card** (PNG, 1080×1350), **quality levels** (Low / Mid / High / Ultra; steps down automatically if the frame rate drops), live demo spider in the menu.
 
 ## Tech
 Three.js (WebGL): pendulum rope physics with sub-steps, a recycled gothic crypt (stone walls, pillars, moonlit windows with soft light shafts, niches with skulls, coffins, cobwebs, bones), flickering candle point lights, moonlight shadows, fog and dust particles, sparks, ACES tone mapping and a restrained bloom (high threshold, no glare). Bundled with esbuild into one classic script, so it runs straight from `file://`. All sounds are real recorded CC0 samples embedded in the page.
@@ -27,6 +27,7 @@ npm install && npm run build
 
 ## Tests
 `python3 test/test_game.py` (Playwright + Chrome, headless WebGL, 47 checks): no console errors, EN/DE toggle and memory, fun within 5 s, mouse / keyboard / touch controls, pendulum physics, candle / bat / swatter / floor hits, golden candy corn, game over, highscore per difficulty, PNG card, difficulty levels, kids mode, mobile portrait, all quality levels, sample decoding, no synth sounds.
+`python3 test/test_mobile.py`: 8 phone configurations (iPhone 13 / 8 / SE in WebKit, Pixel 7 in Chromium, portrait and landscape). It checks that every button is tappable and at least 44 px, that nothing is cut off or scrolls, the auto language, one tap to play with sound, touch control and flat memory.
 
 ## Credits
 All sounds are recorded CC0 samples (see `LICENSES/SOUNDS.md`). Three.js (MIT). Font: Fredoka (SIL Open Font License 1.1).
